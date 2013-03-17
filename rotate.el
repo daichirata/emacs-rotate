@@ -51,23 +51,23 @@
 
 (defun rotate:even-horizontal ()
   (interactive)
-  (rotate:set-layout #'rotate:horizontally-n))
+  (rotate:refresh #'rotate:horizontally-n))
 
 (defun rotate:even-vertical ()
   (interactive)
-  (rotate:set-layout #'rotate:vertically-n))
+  (rotate:refresh #'rotate:vertically-n))
 
 (defun rotate:main-horizontal ()
   (interactive)
-  (rotate:set-layout #'rotate:main-horizontally-n))
+  (rotate:refresh #'rotate:main-horizontally-n))
 
 (defun rotate:main-vertical ()
   (interactive)
-  (rotate:set-layout #'rotate:main-vertically-n))
+  (rotate:refresh #'rotate:main-vertically-n))
 
 (defun rotate:tiled ()
   (interactive)
-  (rotate:set-layout #'rotate:tiled-n))
+  (rotate:refresh #'rotate:tiled-n))
 
 (defun rotate:main-horizontally-n (num)
   (if (<= num 2)
@@ -123,7 +123,7 @@
     (other-window -1)
     (delete-window)))
 
-(defun rotate:set-layout (proc)
+(defun rotate:refresh (proc)
   (let ((window-num (count-windows))
         (buffer-list (mapcar (lambda (wl) (window-buffer wl))
                              (window-list))))
