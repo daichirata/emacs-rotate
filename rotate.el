@@ -36,9 +36,8 @@
 
 (defun rotate-layout ()
   (interactive)
-  (let* ((len   (length rotate-functions))
-         (index (% rotate-count len))
-         (func  (elt rotate-functions index)))
+  (let* ((len (length rotate-functions))
+         (func (elt rotate-functions (% rotate-count len))))
     (prog1 (message "%s" func)
       (call-interactively func)
       (if (>= rotate-count (- len 1))
@@ -129,12 +128,12 @@
         (buffer-list (mapcar (lambda (wl) (window-buffer wl))
                              (window-list))))
     (when (not (one-window-p))
+      (delete-other-windows)
       (save-selected-window
-        (delete-other-windows)
-        (funcall proc window-num)
-        (loop for wl in (window-list)
-              for bl in buffer-list
-              do (set-window-buffer wl bl))))))
+        (funcall proc window-num))
+      (loop for wl in (window-list)
+            for bl in buffer-list
+            do (set-window-buffer wl bl)))))
 
 (defun rotate:window (wl buf)
   (when (not (one-window-p))
