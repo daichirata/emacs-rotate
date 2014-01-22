@@ -34,6 +34,7 @@
     rotate:main-vertical
     rotate:tiled))
 
+;;;###autoload
 (defun rotate-layout ()
   (interactive)
   (let* ((len (length rotate-functions))
@@ -44,27 +45,33 @@
           (setq rotate-count 0)
         (incf rotate-count)))))
 
+;;;###autoload
 (defun rotate-window ()
   (interactive)
   (let ((wl (reverse (window-list))))
     (rotate:window wl (window-buffer (car wl)))))
 
+;;;###autoload
 (defun rotate:even-horizontal ()
   (interactive)
   (rotate:refresh #'rotate:horizontally-n))
 
+;;;###autoload
 (defun rotate:even-vertical ()
   (interactive)
   (rotate:refresh #'rotate:vertically-n))
 
+;;;###autoload
 (defun rotate:main-horizontal ()
   (interactive)
   (rotate:refresh #'rotate:main-horizontally-n))
 
+;;;###autoload
 (defun rotate:main-vertical ()
   (interactive)
   (rotate:refresh #'rotate:main-vertically-n))
 
+;;;###autoload
 (defun rotate:tiled ()
   (interactive)
   (rotate:refresh #'rotate:tiled-n))
