@@ -22,8 +22,32 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+;;; Change Log:
+;;
+;; 2014/07/27 @purucat
+;;    Considered dedicated windows and created the option rotate:exclude-regex-alist
+
 ;;; Code:
 (eval-when-compile (require 'cl))
+
+
+(defgroup rotate nil
+  "tmux like window manager"
+  :group 'windows)
+
+(defcustom rotate:exclude-regex-alist
+  '(
+    ;; e.g.  " buffer-name-with-space-padded"
+    "^ +"
+    ;; e.g.  " *auto-generated-buffer*"
+    "^[ ]+\\*[^*]+\\*"  ; Although this case is included in the 1st expression.
+    )
+  " Setting this variable sometimes becomes useful when you execute (rotate-window).
+buffer-name matching list of regular expression is excluded.
+More than a element of regular expression is tedious, but this makes it easy to maintain the list.
+"
+  :group 'rotate
+  )
 
 (defvar rotate-count 0)
 
@@ -33,6 +57,93 @@
     rotate:main-horizontal
     rotate:main-vertical
     rotate:tiled))
+
+(defun rotate:exclude-p (win)
+  "Return flags of list about which 'win is to be excluded.
+ according to variable rotate:exclude-regex-alist.
+Each flag have value 2^x, which is binary expression corresponding to rotate:exclude-regex-alist.
+"
+  ;;(loop with flag = (make-vector (length win) 0)
+  (loop with flag = (make-vector (length win) 0)
+        with idx_reg = 0
+        for regex in rotate:exclude-regex-alist
+        do 
+        (loop with idx_win = 0
+              for w in win 
+              do
+              (if (string-match regex (buffer-name (window-buffer w))) 
+                  (setf (aref flag idx_win) (+ (aref flag idx_win) (expt 2 idx_reg)))
+                )
+              (incf idx_win)
+              )
+        (incf idx_reg)
+        finally (return (append flag nil)))
+  )
+
+(defun rotate:no-dedicated-window-p (win)
+  "Return flag [1:true, 0:false ] of list for which 'win is window-dedicated-p"
+  (mapcar #'(lambda (x) (if x 1 0)) (mapcar 'window-dedicated-p win))
+  )
+
+(defun rotate:count-windows:no-dedicated ()
+  (length (rotate:window-list:no-dedicated))
+  )
+
+;;notused$ (defun rotate:count-windows:exclude-regex ()
+;;notused$   "Return the number of windows each of which is not dedicated window and not matching rotate:exclude-regex-alist"
+;;notused$   (length (rotate:exclude-p))
+;;notused$   )
+
+(defun rotate:count-windows:no-dedicated ()
+  "Return the number of not dedicated windows."
+  (length (delq t (mapcar 'window-dedicated-p (window-list-1))))
+  )
+
+(defun rotate:one-window-p:no-dedicated ()
+  "Extended version of one-window-p. Ignore dedicated-windows."
+  (let ( (num_win (rotate:count-windows:no-dedicated) ))
+    (if (= num_win 1)
+        t
+      nil))
+  )
+
+;;;###autoload
+(defun rotate:window-list:no-dedicated ()
+  "Return list of windows.
+Ignored files are
+- window-dedicated-p
+"
+  (let* (
+         (wl (window-list-1))
+         (flg2 (rotate:no-dedicated-window-p wl))
+         )
+    (loop
+          for i2 in flg2 
+          for i3 in wl
+          if (> 1 i2) collect i3
+          );loop
+    );let*
+  )
+
+;;;###autoload
+(defun rotate:window-list:exclude-regex ()
+  "Return list of windows.
+Ignored files are
+- window-dedicated-p
+- named rotate:exclude-regex-alist"
+  (let* (
+        (wl (window-list-1))
+         (flg1 (rotate:exclude-p wl))
+         (flg2 (rotate:no-dedicated-window-p wl))
+        )
+    (loop for i1 in flg1
+          for i2 in flg2 
+          for i3 in wl
+          if (> 1 (+ i1 i2))
+          collect i3
+     );loop
+    );let*
+  )
 
 ;;;###autoload
 (defun rotate-layout ()
@@ -48,7 +159,7 @@
 ;;;###autoload
 (defun rotate-window ()
   (interactive)
-  (let ((wl (reverse (window-list))))
+  (let ((wl (reverse (rotate:window-list:exclude-regex))))
     (rotate:window wl (window-buffer (car wl)))))
 
 ;;;###autoload
@@ -131,19 +242,19 @@
     (delete-window)))
 
 (defun rotate:refresh (proc)
-  (let ((window-num (count-windows))
+  (let ((window-num (rotate:count-windows:no-dedicated))
         (buffer-list (mapcar (lambda (wl) (window-buffer wl))
-                             (window-list))))
-    (when (not (one-window-p))
+                             (rotate:window-list:no-dedicated))))
+    (when (not (rotate:one-window-p:no-dedicated))
       (delete-other-windows)
       (save-selected-window
         (funcall proc window-num))
-      (loop for wl in (window-list)
+      (loop for wl in (rotate:window-list:no-dedicated)
             for bl in buffer-list
             do (set-window-buffer wl bl)))))
 
 (defun rotate:window (wl buf)
-  (when (not (one-window-p))
+  (when (not (rotate:one-window-p:no-dedicated))
     (cond
      ((equal (cdr wl) nil)
       (set-window-buffer (car wl) buf)
