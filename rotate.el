@@ -1,11 +1,11 @@
 ;;; rotate.el --- Rotate the layout of emacs
 
-;; Copyright (C) 2013  daic-h
+;; Copyright (C) 2013  daichirata
 
-;; Author: daichi.hirata <daichi.hirat at gmail.com>
+;; Author: daichi.hirata <hirata.daichi at gmail.com>
 ;; Version: 0.1.0
 ;; Keywords: window, layout
-;; URL: https://github.com/daic-h/emacs-rotate
+;; URL: https://github.com/daichirata/emacs-rotate
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
