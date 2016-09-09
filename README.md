@@ -1,8 +1,10 @@
 # emacs-rotate.el
 
+[![MELPA](https://melpa.org/packages/rotate-badge.svg)](https://melpa.org/#/rotate)
+
 ## What's it
 
-This package will help the operation for the multiple windows. 
+This package will help the operation for the multiple windows.
 
 Behavior has been prepared with reference to tmux.
 
