@@ -1,10 +1,10 @@
-;;; rotate.el --- Rotate the layout of emacs
+;;; emacs-rotate.el --- Rotate the layout of emacs
 
 ;; Copyright (C) 2013  daichirata
 
 ;; Author: daichi.hirata <hirata.daichi at gmail.com>
 ;; Version: 0.1.0
-;; Keywords: window, layout
+;; Keywords: frames, window, layout
 ;; URL: https://github.com/daichirata/emacs-rotate
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -135,11 +135,6 @@ Ignored files are
     );let*
   )
 
-
-
-
-
-
 (defvar rotate-functions
   '(rotate:even-horizontal
     rotate:even-vertical
@@ -149,6 +144,8 @@ Ignored files are
 
 ;;;###autoload
 (defun rotate-layout ()
+  "Switches to the next window layout defined in
+`rotate-functions'."
   (interactive)
   (let* ((len (length rotate-functions))
          (func (elt rotate-functions (% rotate-count len))))
@@ -160,10 +157,11 @@ Ignored files are
 
 ;;;###autoload
 (defun rotate-window ()
+  "Rotates windows kind of like swapping them."
   (interactive)
   (let* ((bl (reverse (rotate:buffer-list)))
          (nbl (append (cdr bl) (list (car bl)))))
-    (cl-loop for w in (rotate:window-list:exclude-regex)
+    (cl-loop for w in (rotate:window-list:no-dedicated)
           for b in (reverse nbl)
           do (set-window-buffer w b))
     (select-window (next-window))))
