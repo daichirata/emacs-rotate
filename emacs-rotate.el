@@ -263,4 +263,4 @@ Ignored files are
             do (set-window-buffer w b))
       (select-window (nth current-pos (rotate:window-list:no-dedicated))))))
 
-(provide 'rotate)
+(provide 'emacs-rotate)
