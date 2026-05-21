@@ -1,5 +1,6 @@
 # emacs-rotate.el
 
+[![CI](https://github.com/daichirata/emacs-rotate/actions/workflows/test.yml/badge.svg)](https://github.com/daichirata/emacs-rotate/actions/workflows/test.yml)
 [![MELPA](https://melpa.org/packages/rotate-badge.svg)](https://melpa.org/#/rotate)
 
 ## What's it
@@ -40,11 +41,11 @@ Move a window to the next layout and rearrange the window to fit.
 Default value is
 
 ``` 
-'(rotate:even-horizontal
-  rotate:even-vertical
-  rotate:main-horizontal
-  rotate:main-vertical
-  rotate:tiled)
+'(rotate-even-horizontal
+  rotate-even-vertical
+  rotate-main-horizontal
+  rotate-main-vertical
+  rotate-tiled)
 ```
 
 A number of preset layouts are available. These may be selected with the rotate-layout command or cycled with next-layout; once a layout is chosen, window within it may be moved and resized as normal.
@@ -56,23 +57,23 @@ By replacing this value, you can circulate freely.
 
 The following layouts are supported:
 
-#### `rotate:even-horizontal`
+#### `rotate-even-horizontal`
 
 Spread out evenly from left to right across the window.
 
-#### `rotate:even-vertical`
+#### `rotate-even-vertical`
 
 Spread evenly from top to bottom.
 
-#### `rotate:main-horizontal`
+#### `rotate-main-horizontal`
 
 A large (main) window is shown at the top of the window and the remaining windows are spread from left to right in the leftover space at the bottom. 
 
-#### `rotate:main-vertical`
+#### `rotate-main-vertical`
 
 Similar to main-horizontal but the large window is placed on the left and the others spread from top to bottom along the right. 
 
-#### `rotate:tiled`
+#### `rotate-tiled`
 
 Spread out as evenly as possible over the window in both rows and columns.
 
