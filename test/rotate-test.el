@@ -106,6 +106,54 @@ Return the list of buffers in window order."
      (rotate-layout)
      (should (= (rotate--count) 0)))))
 
+(ert-deftest rotate-test-skip-dedicated-windows-off ()
+  "By default dedicated windows are included in `rotate--window-list'."
+  (rotate-test--with-fresh-frame
+   (lambda ()
+     (rotate-test--make-windows 3)
+     (let ((rotate-skip-dedicated-windows nil)
+           (dedicated (frame-first-window)))
+       (set-window-dedicated-p dedicated t)
+       (unwind-protect
+           (should (= (length (rotate--window-list)) 3))
+         (set-window-dedicated-p dedicated nil))))))
+
+(ert-deftest rotate-test-layout-stable-with-protected-window ()
+  "Repeated `rotate-layout' calls must not keep growing the layout when
+a sidebar-style window protected by `no-delete-other-windows' is
+present.  Regression test for the bug where the count of windows
+increased by one on every invocation."
+  (rotate-test--with-fresh-frame
+   (lambda ()
+     (rotate-test--make-windows 3)
+     (let ((sidebar (frame-first-window)))
+       (set-window-parameter sidebar 'no-delete-other-windows t)
+       (set-window-dedicated-p sidebar t)
+       (unwind-protect
+           (let ((rotate-skip-dedicated-windows t))
+             ;; Make sure we are rotating from one of the eligible
+             ;; windows, not the sidebar.
+             (select-window (next-window sidebar))
+             (let ((before (count-windows)))
+               (dotimes (_ 5) (rotate-layout))
+               (should (= (count-windows) before))))
+         (set-window-dedicated-p sidebar nil)
+         (set-window-parameter sidebar 'no-delete-other-windows nil))))))
+
+(ert-deftest rotate-test-skip-dedicated-windows-on ()
+  "When `rotate-skip-dedicated-windows' is non-nil, dedicated windows are skipped."
+  (rotate-test--with-fresh-frame
+   (lambda ()
+     (rotate-test--make-windows 3)
+     (let ((rotate-skip-dedicated-windows t)
+           (dedicated (frame-first-window)))
+       (set-window-dedicated-p dedicated t)
+       (unwind-protect
+           (progn
+             (should (= (length (rotate--window-list)) 2))
+             (should-not (memq dedicated (rotate--window-list))))
+         (set-window-dedicated-p dedicated nil))))))
+
 (ert-deftest rotate-test-obsolete-aliases ()
   "Legacy `rotate:foo' names should still resolve to the new functions."
   (should (eq (symbol-function 'rotate:even-horizontal)

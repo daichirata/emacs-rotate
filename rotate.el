@@ -60,6 +60,15 @@
   :type '(repeat function)
   :group 'rotate)
 
+(defcustom rotate-skip-dedicated-windows t
+  "When non-nil, ignore dedicated windows in rotate commands.
+This lets the package coexist cleanly with sidebar-style packages
+such as treemacs, neotree, or dired-sidebar, whose windows are
+typically dedicated.  Set to nil to include dedicated windows in
+the rotation."
+  :type 'boolean
+  :group 'rotate)
+
 (defun rotate--count ()
   "Return the layout index for the selected frame."
   (or (frame-parameter nil 'rotate--count) 0))
@@ -182,8 +191,13 @@
     (delete-window)))
 
 (defun rotate--window-list ()
-  "Return the windows of the selected frame, excluding the minibuffer."
-  (window-list nil nil (minibuffer-window)))
+  "Return the windows of the selected frame, excluding the minibuffer.
+When `rotate-skip-dedicated-windows' is non-nil, also drop windows
+that are dedicated to their buffer."
+  (let ((windows (window-list nil nil (minibuffer-window))))
+    (if rotate-skip-dedicated-windows
+        (cl-remove-if #'window-dedicated-p windows)
+      windows)))
 
 (defun rotate--buffer-list ()
   "Return the buffers displayed in the selected frame."
@@ -191,16 +205,20 @@
 
 (defun rotate--refresh-window (proc)
   "Rebuild the layout using PROC and restore the existing buffers."
-  (unless (one-window-p)
-    (let ((window-num (count-windows))
-          (buffer-list (rotate--buffer-list))
-          (current-pos (cl-position (selected-window) (rotate--window-list))))
-      (delete-other-windows)
-      (funcall proc window-num)
-      (cl-loop for w in (rotate--window-list)
-               for b in buffer-list
-               do (set-window-buffer w b))
-      (select-window (nth current-pos (rotate--window-list))))))
+  (let* ((windows (rotate--window-list))
+         (selected (selected-window))
+         (current-pos (cl-position selected windows)))
+    (when (and (> (length windows) 1) current-pos)
+      (let ((window-num (length windows))
+            (buffer-list (rotate--buffer-list)))
+        (dolist (w windows)
+          (unless (eq w selected)
+            (delete-window w)))
+        (funcall proc window-num)
+        (cl-loop for w in (rotate--window-list)
+                 for b in buffer-list
+                 do (set-window-buffer w b))
+        (select-window (nth current-pos (rotate--window-list)))))))
 
 ;; Backward-compatible aliases for the pre-0.2.0 `rotate:foo' names.
 ;; They are built dynamically so the legacy symbols never appear as
