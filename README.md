@@ -52,6 +52,21 @@ A number of preset layouts are available. These may be selected with the rotate-
 
 By replacing this value, you can circulate freely.
 
+#### `rotate-skip-dedicated-windows`
+
+Default value is `t`.
+
+When non-nil, rotate commands ignore dedicated windows.  This lets
+the package coexist cleanly with sidebar-style packages such as
+treemacs, neotree, or dired-sidebar, whose windows are typically
+dedicated.
+
+Set to `nil` to include dedicated windows in the rotation:
+
+```elisp
+(setq rotate-skip-dedicated-windows nil)
+```
+
 
 ## Preset layouts
 
