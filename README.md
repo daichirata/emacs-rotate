@@ -24,6 +24,7 @@ Rotate the positions of the window.
 #### `rotate-layout`
 
 Move a window to the next layout and rearrange the window to fit.
+If only one window is open, it is split first.
 
 **rotate-layout** 2 windows
 
