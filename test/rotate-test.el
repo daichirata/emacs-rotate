@@ -118,6 +118,22 @@ Return the list of buffers in window order."
            (should (= (length (rotate--window-list)) 3))
          (set-window-dedicated-p dedicated nil))))))
 
+(ert-deftest rotate-test-layout-from-single-window-splits ()
+  "`rotate-layout' should split the window when invoked with one window."
+  (rotate-test--with-fresh-frame
+   (lambda ()
+     (should (= (count-windows) 1))
+     (rotate-layout)
+     (should (>= (count-windows) 2)))))
+
+(ert-deftest rotate-test-even-horizontal-from-single-window-splits ()
+  "Individual layout commands should split when invoked with one window."
+  (rotate-test--with-fresh-frame
+   (lambda ()
+     (should (= (count-windows) 1))
+     (rotate-even-horizontal)
+     (should (= (count-windows) 2)))))
+
 (ert-deftest rotate-test-layout-stable-with-protected-window ()
   "Repeated `rotate-layout' calls must not keep growing the layout when
 a sidebar-style window protected by `no-delete-other-windows' is

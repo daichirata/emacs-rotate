@@ -208,13 +208,13 @@ that are dedicated to their buffer."
   (let* ((windows (rotate--window-list))
          (selected (selected-window))
          (current-pos (cl-position selected windows)))
-    (when (and (> (length windows) 1) current-pos)
+    (when current-pos
       (let ((window-num (length windows))
             (buffer-list (rotate--buffer-list)))
         (dolist (w windows)
           (unless (eq w selected)
             (delete-window w)))
-        (funcall proc window-num)
+        (funcall proc (max 2 window-num))
         (cl-loop for w in (rotate--window-list)
                  for b in buffer-list
                  do (set-window-buffer w b))
