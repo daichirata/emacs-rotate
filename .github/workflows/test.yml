@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        emacs_version:
+          - '26.3'
+          - '27.2'
+          - '28.2'
+          - '29.4'
+          - 'snapshot'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+
+      - name: Show Emacs version
+        run: emacs --version
+
+      - name: Byte compile
+        run: |
+          emacs -Q --batch -L . \
+            --eval '(setq byte-compile-error-on-warn t)' \
+            -f batch-byte-compile rotate.el
+
+      - name: Run tests
+        run: |
+          emacs -Q --batch -L . \
+            -l test/rotate-test.el \
+            -f ert-run-tests-batch-and-exit
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: purcell/setup-emacs@master
+        with:
+          version: '29.4'
+
+      - name: Install package-lint
+        run: |
+          emacs -Q --batch \
+            --eval "(progn
+                      (require 'package)
+                      (push '(\"melpa\" . \"https://melpa.org/packages/\") package-archives)
+                      (package-initialize)
+                      (package-refresh-contents)
+                      (package-install 'package-lint))"
+
+      - name: Run package-lint
+        run: |
+          emacs -Q --batch \
+            -l package-lint \
+            -f package-lint-batch-and-exit \
+            rotate.el
