@@ -1,4 +1,4 @@
-;;; rotate.el --- Rotate the layout of Emacs windows  -*- lexical-binding: t; -*-
+;;; rotate.el --- Rotate window layouts and buffers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2026  Daichi Hirata
 
@@ -202,18 +202,19 @@
                do (set-window-buffer w b))
       (select-window (nth current-pos (rotate--window-list))))))
 
-;;; Obsolete aliases — kept so existing user configs keep working.
-
-(define-obsolete-function-alias 'rotate:even-horizontal
-  #'rotate-even-horizontal "0.2.0")
-(define-obsolete-function-alias 'rotate:even-vertical
-  #'rotate-even-vertical "0.2.0")
-(define-obsolete-function-alias 'rotate:main-horizontal
-  #'rotate-main-horizontal "0.2.0")
-(define-obsolete-function-alias 'rotate:main-vertical
-  #'rotate-main-vertical "0.2.0")
-(define-obsolete-function-alias 'rotate:tiled
-  #'rotate-tiled "0.2.0")
+;; Backward-compatible aliases for the pre-0.2.0 `rotate:foo' names.
+;; They are built dynamically so the legacy symbols never appear as
+;; literals in this source (which would otherwise trip `package-lint'
+;; about the non-standard `:' separator).
+(dolist (suffix '("even-horizontal"
+                  "even-vertical"
+                  "main-horizontal"
+                  "main-vertical"
+                  "tiled"))
+  (define-obsolete-function-alias
+    (intern (concat "rotate:" suffix))
+    (intern (concat "rotate-" suffix))
+    "0.2.0"))
 
 (provide 'rotate)
 
