@@ -61,6 +61,8 @@ jobs:
       - name: Run package-lint
         run: |
           emacs -Q --batch \
+            --eval "(require 'package)" \
+            --eval "(package-initialize)" \
             -l package-lint \
             -f package-lint-batch-and-exit \
             rotate.el
